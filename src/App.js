@@ -15,23 +15,16 @@ function App() {
       setMoeda2(e.target.value);
     }
   };
-  const applyCambio = () => {
-    if (lastChanged == 0) {
-      setValue2(value1 * 7);
-    }
-    if (lastChanged == 1) {
-      setValue1(value2 / 7);
-    }
-  };
+
   const handleInputChange = (e, value) => {
     if (!Number(e.target.value) && Number(e.target.value) !== 0) {
       alert("Apenas números são aceitos");
       return;
     }
-    if (value == value1) {
+    if (value == 0) {
       setValue1(e.target.value);
       setLastChanged(0);
-    } else if (value == value2) {
+    } else if (value == 1) {
       setValue2(e.target.value);
       setLastChanged(1);
     }
@@ -43,6 +36,14 @@ function App() {
   useEffect(() => {
     applyCambio();
   }, [value1, value2]);
+  const applyCambio = () => {
+    if (lastChanged == 0) {
+      setValue2(value1 * 7);
+    }
+    if (lastChanged == 1) {
+      setValue1(value2 / 7);
+    }
+  };
   return (
     <div className='App'>
       <div className='title-container'>
@@ -57,7 +58,6 @@ function App() {
             name=''
             id='moeda1'
             onChange={(e) => {
-              console.log("zap");
               handleMoedaChange(e, moeda1);
             }}
           >
@@ -82,14 +82,14 @@ function App() {
           <input
             type='text'
             id='value1'
-            onChange={(e) => handleInputChange(e, value1)}
+            onChange={(e) => handleInputChange(e, 0)}
             value={value1}
           />
           <input
             type='text'
             id='value2'
             value={value2}
-            onChange={(e) => handleInputChange(e, value2)}
+            onChange={(e) => handleInputChange(e, 1)}
           />
         </div>
       </div>
