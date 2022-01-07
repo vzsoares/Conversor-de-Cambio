@@ -6,8 +6,8 @@ function App() {
   const data = {
     valoresEmDolar: {
       dolar: 1,
-      real: 0.18,
-      euro: 1.13,
+      real: 0.176,
+      euro: 1.12,
       yen: 0.0086,
     },
     valoresNativos: {
@@ -17,15 +17,20 @@ function App() {
       yen: 116.14,
     },
   };
-  const [value1, setValue1] = useState(1);
-  const [value2, setValue2] = useState(7);
-  const [moeda1, setMoeda1] = useState("dolar");
-  const [moeda2, setMoeda2] = useState("real");
+  // state values
+  const [currencyValue1, setValue1] = useState(1);
+  const [currencyValue2, setValue2] = useState(7);
+  const [currency1, setMoeda1] = useState("dolar");
+  const [currency2, setMoeda2] = useState("real");
   const [lastChanged, setLastChanged] = useState(0);
-  const handleMoedaChange = (e, moeda) => {
-    if (moeda == moeda1 && e.target.id == "moeda1") {
+  const [reRenderCurrency, setReRenderCurrency] = useState(true);
+  // functions
+
+  const handleCurrencySelectionChange = (e, currency) => {
+    setReRenderCurrency(true);
+    if (currency == currency1 && e.target.id == "currency1") {
       setMoeda1(e.target.value);
-    } else if (moeda == moeda2) {
+    } else if (currency == currency2) {
       setMoeda2(e.target.value);
     }
   };
@@ -35,6 +40,7 @@ function App() {
       alert("Apenas números são aceitos");
       return;
     }
+    setReRenderCurrency(true);
     if (value == 0) {
       setValue1(e.target.value);
       setLastChanged(0);
@@ -43,34 +49,45 @@ function App() {
       setLastChanged(1);
     }
   };
+
   const handleInversion = (e) => {
     e.preventDefault();
-    const holdValue1 = moeda1;
-    const holdValue2 = moeda2;
-    setMoeda1(holdValue2);
-    setMoeda2(holdValue1);
-    setValue1(value2);
+    setReRenderCurrency(false);
+    const holdCurrency1 = currency1;
+    const holdCurrency2 = currency2;
+    const holdCurrencyValue1 = currencyValue1;
+    const holdCurrencyValue2 = currencyValue2;
+    setMoeda1(holdCurrency2);
+    setMoeda2(holdCurrency1);
+    setValue1(holdCurrencyValue2);
+    setValue2(holdCurrencyValue1);
   };
-  useEffect(() => {
-    applyCambio();
-  }, [value1, value2, moeda1, moeda2]);
+
   const applyCambio = () => {
-    const exchangeConverter = (moeda, valor, moedaAlvo) => {
+    const exchangeConverter = (currency, currencyValue, targetCurrency) => {
       return Number(
         (
-          data.valoresEmDolar[moeda] *
-          valor *
-          data.valoresNativos[moedaAlvo]
+          data.valoresEmDolar[currency] *
+          currencyValue *
+          data.valoresNativos[targetCurrency]
         ).toFixed(2)
       );
     };
     if (lastChanged == 0) {
-      setValue2(exchangeConverter(moeda1, value1, moeda2));
+      setValue2(exchangeConverter(currency1, currencyValue1, currency2));
     }
     if (lastChanged == 1) {
-      setValue1(exchangeConverter(moeda2, value2, moeda1));
+      setValue1(exchangeConverter(currency2, currencyValue2, currency1));
     }
   };
+  // useEffect
+
+  useEffect(() => {
+    if (reRenderCurrency) {
+      applyCambio();
+    }
+  }, [currencyValue1, currencyValue2, currency1, currency2]);
+
   return (
     <div className='App'>
       <div className='title-container'>
@@ -82,11 +99,11 @@ function App() {
           style={{ display: "flex", justifyContent: "center" }}
         >
           <select
-            value={moeda1}
+            value={currency1}
             name=''
-            id='moeda1'
+            id='currency1'
             onChange={(e) => {
-              handleMoedaChange(e, moeda1);
+              handleCurrencySelectionChange(e, currency1);
             }}
           >
             <option value='dolar'>dolar</option>
@@ -100,11 +117,11 @@ function App() {
             </a>
           </div>
           <select
-            value={moeda2}
+            value={currency2}
             name=''
-            id='moeda2'
+            id='currency2'
             onChange={(e) => {
-              handleMoedaChange(e, moeda2);
+              handleCurrencySelectionChange(e, currency2);
             }}
           >
             <option value='real'>real</option>
@@ -116,14 +133,14 @@ function App() {
         <div className='results'>
           <input
             type='text'
-            id='value1'
+            id='currencyValue1'
             onChange={(e) => handleInputChange(e, 0)}
-            value={value1}
+            value={currencyValue1}
           />
           <input
             type='text'
-            id='value2'
-            value={value2}
+            id='currencyValue2'
+            value={currencyValue2}
             onChange={(e) => handleInputChange(e, 1)}
           />
         </div>
