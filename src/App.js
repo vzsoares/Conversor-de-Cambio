@@ -18,10 +18,10 @@ function App() {
     },
   };
   // state values
-  const [currencyValue1, setValue1] = useState(1);
-  const [currencyValue2, setValue2] = useState(7);
-  const [currency1, setMoeda1] = useState("dolar");
-  const [currency2, setMoeda2] = useState("real");
+  const [currencyValue1, setCurrencyValue1] = useState(1);
+  const [currencyValue2, setCurrencyValue2] = useState(7);
+  const [currency1, setCurrency1] = useState("dolar");
+  const [currency2, setCurrency2] = useState("real");
   const [lastChanged, setLastChanged] = useState(0);
   const [reRenderCurrency, setReRenderCurrency] = useState(true);
   // functions
@@ -29,9 +29,9 @@ function App() {
   const handleCurrencySelectionChange = (e, currency) => {
     setReRenderCurrency(true);
     if (currency == currency1 && e.target.id == "currency1") {
-      setMoeda1(e.target.value);
+      setCurrency1(e.target.value);
     } else if (currency == currency2) {
-      setMoeda2(e.target.value);
+      setCurrency2(e.target.value);
     }
   };
 
@@ -42,10 +42,10 @@ function App() {
     }
     setReRenderCurrency(true);
     if (value == 0) {
-      setValue1(e.target.value);
+      setCurrencyValue1(e.target.value);
       setLastChanged(0);
     } else if (value == 1) {
-      setValue2(e.target.value);
+      setCurrencyValue2(e.target.value);
       setLastChanged(1);
     }
   };
@@ -57,10 +57,10 @@ function App() {
     const holdCurrency2 = currency2;
     const holdCurrencyValue1 = currencyValue1;
     const holdCurrencyValue2 = currencyValue2;
-    setMoeda1(holdCurrency2);
-    setMoeda2(holdCurrency1);
-    setValue1(holdCurrencyValue2);
-    setValue2(holdCurrencyValue1);
+    setCurrency1(holdCurrency2);
+    setCurrency2(holdCurrency1);
+    setCurrencyValue1(holdCurrencyValue2);
+    setCurrencyValue2(holdCurrencyValue1);
   };
 
   const applyCambio = () => {
@@ -74,10 +74,14 @@ function App() {
       );
     };
     if (lastChanged == 0) {
-      setValue2(exchangeConverter(currency1, currencyValue1, currency2));
+      setCurrencyValue2(
+        exchangeConverter(currency1, currencyValue1, currency2)
+      );
     }
     if (lastChanged == 1) {
-      setValue1(exchangeConverter(currency2, currencyValue2, currency1));
+      setCurrencyValue1(
+        exchangeConverter(currency2, currencyValue2, currency1)
+      );
     }
   };
   // useEffect
