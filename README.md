@@ -10,5 +10,4 @@ Este é um conversor de Cambio que baseia sua funcionalidade em api's atualizada
 
 - react
 - javascript
-- api x
-- api y
+- api https://exchangerate.host/#/
