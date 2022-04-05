@@ -29,8 +29,8 @@ function App() {
   // functions
   function getPreviousDay(date = new Date()) {
     const previous = new Date(date.getTime());
-    previous.setDate(date.getDate() - 1);
-
+    // previous.setDate(date.getDate() - 1);
+    previous.setDate(date.getDate());
     return previous;
   }
   async function getExchangeRate() {
@@ -55,9 +55,9 @@ function App() {
 
   const handleCurrencySelectionChange = (e, currency) => {
     setReRenderCurrency(true);
-    if (currency == currency1 && e.target.id == "currency1") {
+    if (currency === currency1 && e.target.id === "currency1") {
       setCurrency1(e.target.value);
-    } else if (currency == currency2) {
+    } else if (currency === currency2) {
       setCurrency2(e.target.value);
     }
   };
@@ -68,10 +68,10 @@ function App() {
       return;
     }
     setReRenderCurrency(true);
-    if (value == 0) {
+    if (value === 0) {
       setCurrencyValue1(e.target.value);
       setLastChanged(0);
-    } else if (value == 1) {
+    } else if (value === 1) {
       setCurrencyValue2(e.target.value);
       setLastChanged(1);
     }
@@ -100,12 +100,12 @@ function App() {
         ).toFixed(2)
       );
     };
-    if (lastChanged == 0) {
+    if (lastChanged === 0) {
       setCurrencyValue2(
         exchangeConverter(currency1, currencyValue1, currency2)
       );
     }
-    if (lastChanged == 1) {
+    if (lastChanged === 1) {
       setCurrencyValue1(
         exchangeConverter(currency2, currencyValue2, currency1)
       );
@@ -143,6 +143,20 @@ function App() {
     }
   }, [currencyValue1, currencyValue2, currency1, currency2]);
 
+  // style
+  const inputStyle = {
+    border: "2px solid black",
+    borderRadius: "5px",
+    padding: "4px",
+  };
+  const selectStyle = {
+    border: "2px solid black",
+    borderRadius: "5px",
+    padding: "4px",
+    backgroundColor: "white",
+    textTransform: "capitalize",
+  };
+
   return (
     <div className='App'>
       <div className='main' style={{ minHeight: "85vh" }}>
@@ -161,6 +175,7 @@ function App() {
               onChange={(e) => {
                 handleCurrencySelectionChange(e, currency1);
               }}
+              style={{ ...selectStyle }}
             >
               <option value='dolar'>dolar</option>
               <option value='real'>real</option>
@@ -181,6 +196,7 @@ function App() {
             <select
               value={currency2}
               name=''
+              style={selectStyle}
               id='currency2'
               onChange={(e) => {
                 handleCurrencySelectionChange(e, currency2);
@@ -192,18 +208,20 @@ function App() {
               <option value='yen'>yen</option>
             </select>
           </div>
-          <div className='results'>
+          <div className='results' style={{ marginTop: "0.5rem" }}>
             <input
               type='text'
               id='currencyValue1'
               onChange={(e) => handleInputChange(e, 0)}
               value={currencyValue1}
+              style={{ ...inputStyle, marginRight: "0.2rem" }}
             />
             <input
               type='text'
               id='currencyValue2'
               value={currencyValue2}
               onChange={(e) => handleInputChange(e, 1)}
+              style={{ ...inputStyle, marginLeft: "0.2rem" }}
             />
           </div>
         </div>
