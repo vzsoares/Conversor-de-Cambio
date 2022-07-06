@@ -4,21 +4,20 @@ import { FaGithubSquare } from "react-icons/fa";
 
 function App() {
   // state values
-  const [fetchedData, setFetchedData] = useState();
   const [currencyValue1, setCurrencyValue1] = useState(1);
   const [currencyValue2, setCurrencyValue2] = useState(7);
   const [currency1, setCurrency1] = useState("dolar");
   const [currency2, setCurrency2] = useState("real");
   const [lastChanged, setLastChanged] = useState(0);
-  const [reRenderCurrency, setReRenderCurrency] = useState(true);
+
   const [data, setData] = useState({
-    valoresEmDolar: {
+    CurrencyToDollar: {
       dolar: 1,
       real: 0.176,
       euro: 1.12,
       yen: 0.0086,
     },
-    valoresNativos: {
+    DollarToCurrency: {
       dolar: 1,
       real: 5.68,
       euro: 0.89,
@@ -30,18 +29,31 @@ function App() {
     const todayDate = new Date().toISOString().slice(0, 10);
     const url = `https://api.exchangerate.host/${todayDate}?base=USD`;
     let responseObject;
-
     try {
       const response = await fetch(url);
       responseObject = await response.json();
     } catch (error) {
       console.log("error", error);
     }
-    setFetchedData(responseObject);
-  }
 
+    setData({
+      CurrencyToDollar: {
+        dolar: 1,
+        real: (1 / responseObject.rates.BRL).toFixed(2),
+        euro: (1 / responseObject.rates.EUR).toFixed(2),
+        yen: (1 / responseObject.rates.JPY).toFixed(2),
+      },
+      DollarToCurrency: {
+        dolar: 1,
+        real: responseObject.rates.BRL,
+        euro: responseObject.rates.EUR,
+        yen: responseObject.rates.JPY,
+      },
+    });
+    setCurrencyValue2(responseObject.rates.BRL);
+  }
+  console.log(data);
   const handleCurrencySelectionChange = (e, currency) => {
-    setReRenderCurrency(true);
     if (currency === currency1 && e.target.id === "currency1") {
       setCurrency1(e.target.value);
     } else if (currency === currency2) {
@@ -54,7 +66,7 @@ function App() {
       alert("Apenas números são aceitos");
       return;
     }
-    setReRenderCurrency(true);
+
     if (value === 0) {
       setCurrencyValue1(e.target.value);
       setLastChanged(0);
@@ -66,7 +78,6 @@ function App() {
 
   const handleInversion = (e) => {
     e.preventDefault();
-    setReRenderCurrency(false);
     const holdCurrency1 = currency1;
     const holdCurrency2 = currency2;
     const holdCurrencyValue1 = currencyValue1;
@@ -81,9 +92,9 @@ function App() {
     const exchangeConverter = (currency, currencyValue, targetCurrency) => {
       return Number(
         (
-          data.valoresEmDolar[currency] *
+          data.CurrencyToDollar[currency] *
           currencyValue *
-          data.valoresNativos[targetCurrency]
+          data.DollarToCurrency[targetCurrency]
         ).toFixed(2)
       );
     };
@@ -101,33 +112,11 @@ function App() {
   // useEffect
 
   useEffect(() => {
-    if (fetchedData) {
-      setData({
-        valoresEmDolar: {
-          dolar: 1,
-          real: (1 / data.valoresNativos["real"]).toFixed(2),
-          euro: (1 / data.valoresNativos["euro"]).toFixed(2),
-          yen: (1 / data.valoresNativos["yen"]).toFixed(2),
-        },
-        valoresNativos: {
-          dolar: 1,
-          real: fetchedData.rates.BRL,
-          euro: fetchedData.rates.EUR,
-          yen: fetchedData.rates.JPY,
-        },
-      });
-      setCurrencyValue2(fetchedData.rates.BRL);
-    }
-  }, [fetchedData]);
-
-  useEffect(() => {
     getExchangeRate();
   }, []);
 
   useEffect(() => {
-    if (reRenderCurrency) {
-      applyCambio();
-    }
+    applyCambio();
   }, [currencyValue1, currencyValue2, currency1, currency2]);
 
   // style
