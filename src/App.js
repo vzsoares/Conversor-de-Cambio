@@ -26,14 +26,9 @@ function App() {
     },
   });
   // functions
-  function getPreviousDay(date = new Date()) {
-    const previous = new Date(date.getTime());
-    // previous.setDate(date.getDate() - 1);
-    previous.setDate(date.getDate());
-    return previous;
-  }
   async function getExchangeRate() {
-    const previousDay = getPreviousDay();
+    const previousDay = new Date();
+    console.log(previousDay);
     const year = `${previousDay.getFullYear()}`;
     const month = previousDay.getMonth() + 1;
     const monthString = month < 10 ? `0${month}` : `${month}`;
