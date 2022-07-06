@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
 import { TiArrowRepeat } from "react-icons/ti";
 import { FaGithubSquare } from "react-icons/fa";
 
@@ -158,7 +157,7 @@ function App() {
   };
 
   return (
-    <div className='App'>
+    <div style={{ textAlign: "center" }}>
       <div className='main' style={{ minHeight: "85vh" }}>
         <div className='title-container' style={{ marginBottom: "25vh" }}>
           <h1>Conversor de cambio</h1>
