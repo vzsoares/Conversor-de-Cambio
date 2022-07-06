@@ -27,17 +27,10 @@ function App() {
   });
   // functions
   async function getExchangeRate() {
-    const previousDay = new Date();
-    console.log(previousDay);
-    const year = `${previousDay.getFullYear()}`;
-    const month = previousDay.getMonth() + 1;
-    const monthString = month < 10 ? `0${month}` : `${month}`;
-    const day =
-      previousDay.getDate() < 10
-        ? `0${previousDay.getDate()}`
-        : `${previousDay.getDate()}`;
+    const todayDate = new Date().toISOString().slice(0, 10);
+    const url = `https://api.exchangerate.host/${todayDate}?base=USD`;
     let responseObject;
-    const url = `https://api.exchangerate.host/${year}-${monthString}-${day}?base=USD`;
+
     try {
       const response = await fetch(url);
       responseObject = await response.json();
