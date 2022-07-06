@@ -1,147 +1,99 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
 import { TiArrowRepeat } from "react-icons/ti";
 import { FaGithubSquare } from "react-icons/fa";
 
 function App() {
   // state values
-  const [fetchedData, setFetchedData] = useState();
-  const [currencyValue1, setCurrencyValue1] = useState(1);
-  const [currencyValue2, setCurrencyValue2] = useState(7);
-  const [currency1, setCurrency1] = useState("dolar");
-  const [currency2, setCurrency2] = useState("real");
+  const [currencyInput0, setCurrencyInput0] = useState(1);
+  const [currencyInput1, setCurrencyInput1] = useState(7);
+  const [currencySelect0, setCurrencySelect0] = useState("dollar");
+  const [currencySelect1, setCurrencySelect1] = useState("real");
   const [lastChanged, setLastChanged] = useState(0);
-  const [reRenderCurrency, setReRenderCurrency] = useState(true);
+
   const [data, setData] = useState({
-    valoresEmDolar: {
-      dolar: 1,
+    CurrencyToDollar: {
+      dollar: 1,
       real: 0.176,
       euro: 1.12,
       yen: 0.0086,
     },
-    valoresNativos: {
-      dolar: 1,
+    DollarToCurrency: {
+      dollar: 1,
       real: 5.68,
       euro: 0.89,
       yen: 116.14,
     },
   });
+
   // functions
-  function getPreviousDay(date = new Date()) {
-    const previous = new Date(date.getTime());
-    // previous.setDate(date.getDate() - 1);
-    previous.setDate(date.getDate());
-    return previous;
-  }
-  async function getExchangeRate() {
-    const previousDay = getPreviousDay();
-    const year = `${previousDay.getFullYear()}`;
-    const month = previousDay.getMonth() + 1;
-    const monthString = month < 10 ? `0${month}` : `${month}`;
-    const day =
-      previousDay.getDate() < 10
-        ? `0${previousDay.getDate()}`
-        : `${previousDay.getDate()}`;
+  async function fetchExchangeRate() {
+    const todayDate = new Date().toISOString().slice(0, 10);
+    const url = `https://api.exchangerate.host/${todayDate}?base=USD`;
     let responseObject;
-    const url = `https://api.exchangerate.host/${year}-${monthString}-${day}?base=USD`;
+
     try {
       const response = await fetch(url);
       responseObject = await response.json();
     } catch (error) {
       console.log("error", error);
     }
-    setFetchedData(responseObject);
+
+    setData({
+      CurrencyToDollar: {
+        dollar: 1,
+        real: (1 / responseObject.rates.BRL).toFixed(2),
+        euro: (1 / responseObject.rates.EUR).toFixed(2),
+        yen: (1 / responseObject.rates.JPY).toFixed(2),
+      },
+      DollarToCurrency: {
+        dollar: 1,
+        real: responseObject.rates.BRL,
+        euro: responseObject.rates.EUR,
+        yen: responseObject.rates.JPY,
+      },
+    });
+    setCurrencyInput1(responseObject.rates.BRL);
   }
 
-  const handleCurrencySelectionChange = (e, currency) => {
-    setReRenderCurrency(true);
-    if (currency === currency1 && e.target.id === "currency1") {
-      setCurrency1(e.target.value);
-    } else if (currency === currency2) {
-      setCurrency2(e.target.value);
-    }
-  };
-
-  const handleInputChange = (e, value) => {
-    if (!Number(e.target.value) && Number(e.target.value) !== 0) {
-      alert("Apenas números são aceitos");
-      return;
-    }
-    setReRenderCurrency(true);
-    if (value === 0) {
-      setCurrencyValue1(e.target.value);
-      setLastChanged(0);
-    } else if (value === 1) {
-      setCurrencyValue2(e.target.value);
-      setLastChanged(1);
-    }
-  };
-
-  const handleInversion = (e) => {
+  function handleInversion(e) {
     e.preventDefault();
-    setReRenderCurrency(false);
-    const holdCurrency1 = currency1;
-    const holdCurrency2 = currency2;
-    const holdCurrencyValue1 = currencyValue1;
-    const holdCurrencyValue2 = currencyValue2;
-    setCurrency1(holdCurrency2);
-    setCurrency2(holdCurrency1);
-    setCurrencyValue1(holdCurrencyValue2);
-    setCurrencyValue2(holdCurrencyValue1);
-  };
+    setCurrencySelect0(currencySelect1);
+    setCurrencySelect1(currencySelect0);
+  }
 
-  const applyCambio = () => {
-    const exchangeConverter = (currency, currencyValue, targetCurrency) => {
+  function applyCambio() {
+    function exchangeConverter(currency, currencyValue, targetCurrency) {
       return Number(
         (
-          data.valoresEmDolar[currency] *
+          data.CurrencyToDollar[currency] *
           currencyValue *
-          data.valoresNativos[targetCurrency]
+          data.DollarToCurrency[targetCurrency]
         ).toFixed(2)
       );
-    };
+    }
+
     if (lastChanged === 0) {
-      setCurrencyValue2(
-        exchangeConverter(currency1, currencyValue1, currency2)
+      setCurrencyInput1(
+        exchangeConverter(currencySelect0, currencyInput0, currencySelect1)
       );
+      return;
     }
     if (lastChanged === 1) {
-      setCurrencyValue1(
-        exchangeConverter(currency2, currencyValue2, currency1)
+      setCurrencyInput0(
+        exchangeConverter(currencySelect1, currencyInput1, currencySelect0)
       );
+      return;
     }
-  };
+  }
+
   // useEffect
-
   useEffect(() => {
-    if (fetchedData) {
-      setData({
-        valoresEmDolar: {
-          dolar: 1,
-          real: (1 / data.valoresNativos["real"]).toFixed(2),
-          euro: (1 / data.valoresNativos["euro"]).toFixed(2),
-          yen: (1 / data.valoresNativos["yen"]).toFixed(2),
-        },
-        valoresNativos: {
-          dolar: 1,
-          real: fetchedData.rates.BRL,
-          euro: fetchedData.rates.EUR,
-          yen: fetchedData.rates.JPY,
-        },
-      });
-      setCurrencyValue2(fetchedData.rates.BRL);
-    }
-  }, [fetchedData]);
-
-  useEffect(() => {
-    getExchangeRate();
+    fetchExchangeRate();
   }, []);
 
   useEffect(() => {
-    if (reRenderCurrency) {
-      applyCambio();
-    }
-  }, [currencyValue1, currencyValue2, currency1, currency2]);
+    applyCambio();
+  }, [currencyInput0, currencyInput1, currencySelect0, currencySelect1]);
 
   // style
   const inputStyle = {
@@ -158,32 +110,25 @@ function App() {
   };
 
   return (
-    <div className='App'>
-      <div className='main' style={{ minHeight: "85vh" }}>
-        <div className='title-container' style={{ marginBottom: "25vh" }}>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ minHeight: "75vh" }}>
+        <div style={{ marginBottom: "25vh" }}>
           <h1>Conversor de cambio</h1>
         </div>
-        <div className='conversor-container'>
-          <div
-            className='moedas'
-            style={{ display: "flex", justifyContent: "center" }}
-          >
+        <div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             <select
-              value={currency1}
-              name=''
-              id='currency1'
-              onChange={(e) => {
-                handleCurrencySelectionChange(e, currency1);
-              }}
-              style={{ ...selectStyle }}
+              value={currencySelect0}
+              onChange={(e) => setCurrencySelect0(e.target.value)}
+              style={selectStyle}
             >
-              <option value='dolar'>dolar</option>
+              <option value='dollar'>dollar</option>
               <option value='real'>real</option>
               <option value='euro'>euro</option>
               <option value='yen'>yen</option>
             </select>
-            <div className='div'>
-              <a onClick={(e) => handleInversion(e)} href=''>
+            <div>
+              <a onClick={(e) => handleInversion(e)} href='/'>
                 <TiArrowRepeat
                   style={{
                     fontSize: "2rem",
@@ -194,33 +139,33 @@ function App() {
               </a>
             </div>
             <select
-              value={currency2}
-              name=''
+              value={currencySelect1}
               style={selectStyle}
-              id='currency2'
-              onChange={(e) => {
-                handleCurrencySelectionChange(e, currency2);
-              }}
+              onChange={(e) => setCurrencySelect1(e.target.value)}
             >
               <option value='real'>real</option>
-              <option value='dolar'>dolar</option>
+              <option value='dollar'>dollar</option>
               <option value='euro'>euro</option>
               <option value='yen'>yen</option>
             </select>
           </div>
-          <div className='results' style={{ marginTop: "0.5rem" }}>
+          <div style={{ marginTop: "0.5rem" }}>
             <input
-              type='text'
-              id='currencyValue1'
-              onChange={(e) => handleInputChange(e, 0)}
-              value={currencyValue1}
+              type='number'
+              min='0'
+              onChange={(e) =>
+                setCurrencyInput0(e.target.value) & setLastChanged(0)
+              }
+              value={currencyInput0}
               style={{ ...inputStyle, marginRight: "0.2rem" }}
             />
             <input
-              type='text'
-              id='currencyValue2'
-              value={currencyValue2}
-              onChange={(e) => handleInputChange(e, 1)}
+              type='number'
+              min='0'
+              value={currencyInput1}
+              onChange={(e) =>
+                setCurrencyInput1(e.target.value) & setLastChanged(1)
+              }
               style={{ ...inputStyle, marginLeft: "0.2rem" }}
             />
           </div>
